@@ -1,0 +1,12 @@
+version: "3.3"
+
+services:
+  postgres_service:
+    container_name: ts_graphql-postgres
+    image: kartoza/postgis:14-3.1
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASS=fred
+      - POSTGRES_DBNAME=hacker-news
+    ports:
+      - 5432:5432

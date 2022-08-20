@@ -33,7 +33,7 @@ export const LinkQuery = extendType({
       type: "Link",
       resolve(parent, args, context, info) {
         // 4
-        return links;
+        return context.prisma.link.findMany();
       },
     });
   },
@@ -49,9 +49,12 @@ export const LinkByIdQuery = extendType({
       args: {
         id: nonNull(intArg()),
       },
-      resolve(parent, args, context, info) {
+      async resolve(parent, args, context, info) {
         // 4
-        return links.find(({ id }) => id === args.id);
+        const [link] = await context.prisma.link.findMany({
+          where: { id: args.id },
+        });
+        return link;
       },
     });
   },
@@ -72,15 +75,12 @@ export const LinkMutation = extendType({
 
       resolve(parent, args, context) {
         const { description, url } = args; // 4
-
-        let idCount = links.length + 1; // 5
-        const link = {
-          id: idCount,
-          description: description,
-          url: url,
-        };
-        links.push(link);
-        return link;
+        return context.prisma.link.create({
+          data: {
+            description,
+            url,
+          },
+        });
       },
     });
   },
@@ -103,14 +103,10 @@ export const UpdateLinkMutation = extendType({
       resolve(parent, args, context) {
         const { id: argsId, description, url } = args; // 4
 
-        const link = {
-          id: argsId,
-          description: description,
-          url: url,
-        };
-        const foundIndex = links.findIndex(({ id }) => id === argsId);
-        links[foundIndex] = { ...link };
-        return link;
+        return context.prisma.link.update({
+          where: { id: argsId },
+          data: { description, url },
+        });
       },
     });
   },
