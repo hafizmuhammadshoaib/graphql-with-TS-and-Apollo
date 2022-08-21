@@ -1,5 +1,4 @@
 import { extendType, intArg, nonNull, objectType, stringArg } from "nexus";
-import { NexusGenObjects } from "../../nexus-typegen";
 
 export const Link = objectType({
   name: "Link",
@@ -7,6 +6,7 @@ export const Link = objectType({
     t.nonNull.int("id");
     t.nonNull.string("description");
     t.nonNull.string("url");
+    t.nonNull.dateTime("createdAt");
     t.field("postedBy", {
       // 1
       type: "User",
@@ -28,20 +28,6 @@ export const Link = objectType({
     });
   },
 });
-
-let links: NexusGenObjects["Link"][] = [
-  // 1
-  {
-    id: 1,
-    url: "www.howtographql.com",
-    description: "Fullstack tutorial for GraphQL",
-  },
-  {
-    id: 2,
-    url: "graphql.org",
-    description: "GraphQL official website",
-  },
-];
 
 export const LinkQuery = extendType({
   // 2
@@ -150,11 +136,9 @@ export const DeleteLinkMutation = extendType({
       },
 
       resolve(parent, args, context) {
-        const { id: argsId } = args; // 4
+        const { id: argsId } = args;
 
-        const foundIndex = links.findIndex(({ id }) => id === argsId);
-        const [deletedLink] = links.splice(foundIndex, 1);
-        return deletedLink;
+        return context.prisma.link.delete({ where: { id: argsId } });
       },
     });
   },
